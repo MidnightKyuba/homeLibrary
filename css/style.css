@@ -1,0 +1,45 @@
+.naglowek
+{
+	background-color:brown;
+	min-height: 10vh;
+}
+.title
+{
+	color:gold;
+	text-align: center;
+}
+.main
+{
+	min-height:85vh;
+	background-color: #c7c09f;
+}
+.mainlight
+{
+	background-color: #f2e8c7;
+}
+.backgroundone
+{
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-image: url(../grafika/libr.jpg);
+	color: white;
+}
+.stopka
+{
+	min-height:5vh;
+	color:white;
+}
+.text
+{
+	font-size: medium;
+}
+.search
+{
+	display: none;
+	background-color: #8585f0;
+}
+.buttonsbar
+{
+	background-color: black;
+}
