@@ -51,12 +51,15 @@
 		<div class="offset-xl-3 col-xl-6 offset-xl-3 offset-lg-3 col-lg-6 offset-lg-3 offset-md-3 col-md-6 offset-md-3 col-sm-12 col-12 mainlight">
 		<?php
 			echo "<p class='text'>Login: ".$_SESSION['login']."</p>";
-			$connect = pg_connect();
-			if($connect)
+			$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+			if(!$mysqli->connect_error)
 			{
-				$results = pg_query($connect,"SELECT email FROM users WHERE user_id=".$_SESSION['userID']."");
-				$row1 = pg_fetch_row($results);
+				$results = $mysqli->prepare("SELECT email FROM users WHERE user_id=?".$_SESSION['userID']."");
+				$results->bind_param("i", $_SESSION['userID']);
+				$results->execute();
+				$row1 = $results->fetch_row();
 				echo "<p class='text'>Email: ".$row1[0]."</p>";
+				$mysqli->close();
 			}
 			else
 			{
@@ -96,14 +99,15 @@
 			<label class="form-label text">Użytkownik:</label>
 			<select name="UserId" required>
 				<?php
-					$connect = pg_connect();
-					if($connect)
+					$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+					if(!$mysqli->connect_error)
 					{
-						$results = pg_query($connect,"SELECT user_id, login FROM users ");
-						while ($row1 = pg_fetch_row($results))
+						$results = $mysqli->query("SELECT user_id, login FROM users");
+						while ($row1 = $results->fetch_row())
 						{
 							echo '<option value="'.$row1[0].'">'.$row1[0].'.'.$row1[1].'</option>';
 						}
+						$mysqli->close();
 					}
 					else
 					{
@@ -114,14 +118,15 @@
 			<label class="form-label text">Ranga:</label>
 			<select name="RankId" required>
 				<?php
-					$connect = pg_connect();
-					if($connect)
+					$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+					if(!$mysqli->connect_error)
 					{
-						$results = pg_query($connect,"SELECT rank_id, rank_name FROM ranks ");
-						while ($row1 = pg_fetch_row($results))
+						$results = $mysqli->query($connect,"SELECT rank_id, rank_name FROM ranks");
+						while ($row1 = $results->fetch_row())
 						{
 							echo '<option value="'.$row1[0].'">'.$row1[1].'</option>';
 						}
+						$mysqli->close();
 					}
 					else
 					{

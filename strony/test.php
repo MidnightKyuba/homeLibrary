@@ -1,10 +1,11 @@
 <?php
-	$connect = pg_connect();
-    if($connect)
+	$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+    if(!$mysqli->connect_error)
 	{
-		$results = pg_query($connect,"SELECT author_id FROM authorship WHERE all_book_id=1");
-		$userID = pg_fetch_row($results);
-		echo '<p>'.$userID[0].'</p>';
+		$results = $mysqli->query("SELECT rank_name FROM ranks WHERE rank_id=3");
+		$rankName = $results->fetch_row();
+		echo '<p>'.$rankName[0].'</p>';
+		$mysqli->close();
 	}
     else
 	{

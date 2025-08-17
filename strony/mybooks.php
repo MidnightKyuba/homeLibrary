@@ -66,13 +66,14 @@
 				<select name="Serie">
 					<option value="0">Wszstkie</option>
 					<?php
-						$connect = pg_connect();
-						if($connect)
+						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+						if(!$mysqli->connect_error)
 						{
-							$results = pg_query($connect,"Select serie_id, name From series");
-							while ($row = pg_fetch_row($results)) {
+							$results = $mysqli->query("Select serie_id, name From series");
+							while ($row = $results->fetch_row()) {
 								echo '<option value="'.$row[0].'">'.$row[1].'</option>';
 							}
+							$mysqli->close();
 						}
 						else
 						{
@@ -84,13 +85,14 @@
 				<select name="Genre">
 					<option value="0">Wszstkie</option>
 					<?php
-						$connect = pg_connect();
-						if($connect)
+						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+						if(!$mysqli->connect_error)
 						{
-							$results = pg_query($connect,"select * from genres");
-							while ($row = pg_fetch_row($results)) {
+							$results = $mysqli->query("select * from genres");
+							while ($row = $results->fetch_row()) {
 								echo '<option value="'.$row[0].'">'.$row[1].'</option>';
 							}
+							$mysqli->close();
 						}
 						else
 						{
@@ -100,15 +102,16 @@
 				</select><br>
 				<label>Autorzy:</label><br>
 				<?php
-					$connect = pg_connect();
-					if($connect)
+					$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+					if(!$mysqli->connect_error)
 					{
-						$results = pg_query($connect,"Select author_id, name, surname From authors");
-						while ($row = pg_fetch_row($results)) {
+						$results = $mysqli->query("Select author_id, name, surname From authors");
+						while ($row = $results->fetch_row()) {
 							echo '<input type="checkbox" name="Authors[]" value="'.$row[0].'">';
 							echo '<label class="text form-label">'.$row[0].'.'.$row[1].' '.$row[2].'</label>';
 							echo '<br>';
 						}
+						$mysqli->close();
 					}
 					else
 					{
@@ -122,14 +125,14 @@
 				<select name="Language">
 					<option value="0">Wszstkie</option>
 					<?php
-						$connect = pg_connect();
-						if($connect)
+						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+						if($mysqli->connect_error)
 						{
-							$results = pg_query($connect,"Select * From languages");
-							while ($row = pg_fetch_row($results)) {
+							$results = $mysqli->query("Select * From languages");
+							while ($row = $results->fetch_row()) {
 								echo '<option value="'.$row[0].'">Język '.$row[1].'</option>';
 							}
-							pg_close();
+							$mysqli->close();
 						}
 						else
 						{
@@ -184,7 +187,7 @@
 			{
 				$query1 = $query1." and";
 			}
-			$query1 = $query1." title Like '%".$_GET['Title']."%S'";
+			$query1 = $query1." title Like '%".$_GET['Title']."%'";
 		}
 		if(!empty($_GET['Serie']))
 		{
