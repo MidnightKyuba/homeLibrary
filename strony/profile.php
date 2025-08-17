@@ -54,7 +54,7 @@
 			$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 			if(!$mysqli->connect_error)
 			{
-				$results = $mysqli->prepare("SELECT email FROM users WHERE user_id=?".$_SESSION['userID']."");
+				$results = $mysqli->prepare("SELECT email FROM users WHERE user_id=?");
 				$results->bind_param("i", $_SESSION['userID']);
 				$results->execute();
 				$row1 = $results->fetch_row();
