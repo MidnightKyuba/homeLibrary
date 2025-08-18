@@ -173,110 +173,108 @@
 <?php
 	function search()
 	{
-		$query1 = "Select all_book_id from allbooks";
-		$iffirst = 0;
-		$iffirsta = 0;
-		if(!empty($_GET['Title']))
+		$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+		if($mysqli->connect_error)
 		{
-			if($iffirst == 0)
+			$titleResult = [];
+			$serieResult = [];
+			$genreResult = [];
+			$languageResult = [];
+			$authorResult = [];
+			if(!empty($_GET['Title']))
 			{
-				$query1 = $query1." where";
-				$iffirst = 1;
-			}
-			else
-			{
-				$query1 = $query1." and";
-			}
-			$query1 = $query1." title Like '%".$_GET['Title']."%'";
-		}
-		if(!empty($_GET['Serie']))
-		{
-			if($iffirst == 0)
-			{
-				$query1 = $query1." where";
-				$iffirst = 1;
-			}
-			else
-			{
-				$query1 = $query1." and";
-			}
-			$query1 = $query1." serie_id =".$_GET['Serie']."";
-		}
-		if(!empty($_GET['Genre']))
-		{
-			if($iffirst == 0)
-			{
-				$query1 = $query1." where";
-				$iffirst = 1;
-			}
-			else
-			{
-				$query1 = $query1." and";
-			}
-			$query1 = $query1." genre_id=".$_GET['Genre']."";
-		}
-		if(!empty($_GET['Language']))
-		{
-			if($iffirst == 0)
-			{
-				$query1 = $query1." where";
-				$iffirst = 1;
-			}
-			else
-			{
-				$query1 = $query1." and";
-			}
-			$query1 = $query1." language_id=".$_GET['Language']."";
-		}
-		$query2 ="Select all_book_id from authorship";
-		if(!empty($_GET['Authors']))
-		{
-			$oquery2 = $query2;
-			foreach($_GET['Authors'] as $author)
-			{
-				if($iffirsta == 0)
+				$result = $mysqli->prepare("Select all_book_id from allbooks where title Like ?");
+				$result->bind_param("s", "%".$_GET['Title']."%");
+				$result->execute();
+				while($row = $result->fetch_row())
 				{
-					$query2 = $query2." where";
-					$iffirsta = 1;
-					$query2 = $query2." author_id=".$author."";
+					$titleResult[] = $row;
 				}
-				else
+			}
+			if(!empty($_GET['Serie']))
+			{
+				$result = $mysqli->prepare("Select all_book_id from allbooks where serie_id=?");
+				$result->bind_param("i", $_GET['Serie']);
+				$result->execute();
+				while($row = $result->fetch_row())
 				{
+					$serieResult[] = $row;
+				}
+			}
+			if(!empty($_GET['Genre']))
+			{
+				$result = $mysqli->prepare("Select all_book_id from allbooks where genre_id=?");
+				$result->bind_param("i", $_GET['Genre']);
+				$result->execute();
+				while($row = $result->fetch_row())
+				{
+					$genreResult[] = $row;
+				}
+			}
+			if(!empty($_GET['Language']))
+			{
+				$result = $mysqli->prepare("Select all_book_id from allbooks where language_id=?");
+				$result->bind_param("i", $_GET['Language']);
+				$result->execute();
+				while($row = $result->fetch_row())
+				{
+					$languageResult[] = $row;
+				}
+			}
+			if(!empty($_GET['Authors']))
+			{
+				foreach($_GET['Authors'] as $author)
+				{
+					$result = $mysqli->prepare("Select all_book_id from authorship where author_id=?");
+					$result->bind_param("i", $author);
+					$result->execute();
+					$temporaryresult = [];
+					while($row = $result->fetch_row())
+					{
+						$temporaryresult[] = $row;
+					}
 					if($_GET['Unity'] == 0)
 					{
-						$query2 = $query2." union ".$oquery2." where author_id=".$author."";
+						$authorResult = array_merge($authorResult, $temporaryresult);
 					}
 					else
 					{
-						$query2 = $query2." intersect ".$oquery2." where author_id=".$author."";
+						$authorResult = array_intersect($authorResult, $temporaryresult);
 					}
 				}
 			}
-		}
-		$query = "Select copy_id, a.all_book_id, a.cover, a.title ,s.name as serie from copies c inner join allbooks a on c.all_book_id = a.all_book_id inner join series s on s.serie_id = a.serie_id";
-		if($iffirst == 1 and $iffirsta == 1)
-		{
-			$query = $query." where c.all_book_id in (".$query1.") intersect ".$query." where c.all_book_id in (".$query2.") intersect ".$query." where c.all_book_id in (select all_book_id from copies where user_id=".$_SESSION['userID'].")";
-		}
-		elseif($iffirst == 0 and $iffirsta == 1)
-		{
-			$query = $query." where c.all_book_id in (".$query2.") intersect ".$query." where c.all_book_id in (select all_book_id from copies where user_id=".$_SESSION['userID'].")";
-		}
-		elseif($iffirst == 1 and $iffirsta == 0)
-		{
-			$query = $query." where c.all_book_id in (".$query1.") intersect ".$query." where c.all_book_id in (select all_book_id from copies where user_id=".$_SESSION['userID'].")";
-		}
-		else
-		{
-			$query = $query." where user_id=".$_SESSION['userID'];
-		}
-		$connect = pg_connect();
-		if($connect)
-		{
-			$results = pg_query($connect, $query);
+			$bookIdIntersect = [];
+			$arrayResults = array ($titleResult, $serieResult, $genreResult, $languageResult, $authorResult);
+			$iffirst = 0;
+			foreach($arrayResults as $array)
+			{
+				if(!empty($array))
+				{
+					if($iffirst == 0)
+					{
+						$bookIdIntersect = array_merge($bookIdIntersect, $array);
+						$iffirst = 1;
+					}
+					else
+					{
+						$bookIdIntersect = array_intersect($bookIdIntersect, $array);
+					}
+				}
+			}
+			if(!empty($bookIdIntersect))
+			{
+				$results = $mysqli->prepare("Select copy_id, a.all_book_id, a.cover, a.title, s.name as serie from copies c inner join allbook a on c.all_book_id = a.all_book_id inner join series s on s.serie_id = a.serie_id where c.all_book_id in ? and c.user_id=?");
+				$results->bind_param("si", "(".implode(",",$bookIdIntersect).")", $_SESSION['userID']);
+			}
+			else
+			{
+				$results = $mysqli->prepare("Select copy_id, a.all_book_id, a.cover, a.title, s.name as serie from copies c inner join allbook a on c.all_book_id = a.all_book_id inner join series s on s.serie_id = a.serie_id where c.user_id=?");
+				$results->bind_param("i", $_SESSION['userID']);
+			}
+			$results->execute();
 			if(!empty($results))
 			{
-				while($row1 = pg_fetch_row($results))
+				while($row1 = $results->fetch_row())
 				{
 					echo '<div class="card col-12 col-sm-12 col-md-4 col-lg-3 col-xl-2 mainlight">';
 						if(!empty($row1[2]))
@@ -290,8 +288,10 @@
 						echo '<div class="card-body">';
 						echo '<h5 class="card-title text">'.$row1[3].'</h5>';
 						echo '<p class="card-text text">Autor:<br>';
-						$results2 = pg_query($connect, "Select name, surname from authors natural join authorship where all_book_id=".$row1[1]."");
-						while($row2 = pg_fetch_row($results2))
+						$results2 = $mysqli->prepare("Select name, surname from authors natural join authorship where all_book_id=?");
+						$results2->bind_param("i", $row1[1]);
+						$results2->execute();
+						while($row2 = $results2->fetch_row())
 						{
 							echo $row2[0].' '.$row2[1].'<br>';
 						}
@@ -301,6 +301,7 @@
 					echo '</div>';
 				}
 			}
+			$mysqli->close();
 		}
 		else
 		{
