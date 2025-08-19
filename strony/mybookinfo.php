@@ -40,7 +40,7 @@
 					}
 					else
 					{
-						echo '<a class="dropdown-item" href="#">Wiadomości</a>';
+						echo '<a class="dropdown-item" href="messages.php">Wiadomości</a>';
 					}
 					?>
 					<a class="dropdown-item" href="../skrypty/logout.php">Wyloguj</a>
@@ -51,12 +51,16 @@
 	<div class="row main">
 		<div class="offset-xl-3 col-xl-6 offset-lg-2 col-lg-8 offset-md-1 col-ml-10 col-sm-12 col-12 mainlight">
 			<?php
-				$connect = pg_connect();
-				if($connect)
+				$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+				if(!$mysqli->connect_error)
 				{
-					$result1 = pg_query($connect,"Select a.all_book_id, cover, title, l.name as language, g.name as genre, a.serie_id, s.name as serie, publisher, publish_date, pages, a.description from allbooks a inner join copies c on a.all_book_id = c.all_book_id inner join languages l on l.language_id = a.language_id inner join genres g on g.genre_id = a.genre_id inner join series s on s.serie_id = a.serie_id where copy_id=".$_GET['id']."");
-					$row1 = pg_fetch_row($result1);
-					$results2 = pg_query($connect,"Select author_id, name, surname from authors natural join authorship where all_book_id=".$row1[0]);
+					$result1 = $mysqli->prepare("Select a.all_book_id, cover, title, l.name as language, g.name as genre, a.serie_id, s.name as serie, publisher, publish_date, pages, a.description from allbooks a inner join copies c on a.all_book_id = c.all_book_id inner join languages l on l.language_id = a.language_id inner join genres g on g.genre_id = a.genre_id inner join series s on s.serie_id = a.serie_id where copy_id=?");
+					$result1->bind_param("i",$_GET['id']);
+					$result1->execute();
+					$row1 = $result1->fetch_row();
+					$results2 = $mysqli->prepare("Select author_id, name, surname from authors natural join authorship where all_book_id=?");
+					$results2->bind_param("i",$row1[0]);
+					$results2->execute();
 					if(!empty($row1[1]))
 					{
 						echo '<img class="image-fluid" src="../grafika/okladki/'.$row1[1].'?'.filemtime('../grafika/okladki/'.$row1[1]).'">';
@@ -66,7 +70,7 @@
 						echo '<img class="image-fluid" src="../grafika/null.png">';
 					}
 					echo '<p class="text">Tytuł: '.$row1[2].'<br>Autorzy: <br>';
-					while($row2 = pg_fetch_row($results2))
+					while($row2 = $results2->fetch_row())
 					{
 						echo '<a href="authorinfo.php?id='.$row2[0].'">'.$row2[1].' '.$row2[2].'</a>';
 						echo '<br>';
@@ -79,8 +83,10 @@
 					Ilość stron: '.$row1[9].'<br>
 					Opis: '.$row1[10].'</p><hr>';
 					echo '<p class="text">Obecnie czyta: ';
-					$result = pg_query($connect,"Select who_reading from copies where copy_id=".$_GET['id']."");
-					$row3 = pg_fetch_row($result);
+					$result = $mysqli->prepare("Select who_reading from copies where copy_id=?");
+					$result->bind_param("i",$_GET['id']);
+					$result->execute();
+					$row3 = $result->fetch_row();
 					echo $row3[0];
 					echo '</p>';
 					echo '<form action="../skrypty/readMyBook.php" method="post">
@@ -93,6 +99,7 @@
 					<input type="number" value="'.$_GET['id'].'" name="CopyID" hidden>
 					<button type="submit" class="text btn btn-primary">Usuń z moich książek</button>
 					</form>';
+					$mysqli->close();
 				}
 				else
 				{

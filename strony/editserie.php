@@ -5,6 +5,14 @@
         header('Location: ../index.php');
 		exit();
     }
+	else
+	{
+		if($_SESSION['rank'] === 3)
+		{
+			header('Location: ../index.php');
+			exit();
+		}
+	}
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -40,7 +48,7 @@
 					}
 					else
 					{
-						echo '<a class="dropdown-item" href="#">Wiadomości</a>';
+						echo '<a class="dropdown-item" href="messages.php">Wiadomości</a>';
 					}
 					?>
 					<a class="dropdown-item" href="../skrypty/logout.php">Wyloguj</a>
@@ -54,12 +62,15 @@
 				<label class="form-label text">Nazwa serii:</label>
 				<input class="form-control" name="Name" type="text" minlenght="1" required  value=
                 <?php
-                    $connect = pg_connect();
-					if($connect)
+                    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+					if(!$mysqli->connect_error)
 					{
-						$result = pg_query($connect,"Select name From series Where serie_id=".$_GET['id']);
-						$row = pg_fetch_row($result);
+						$result = $mysqli->prepare("Select name From series Where serie_id=?");
+						$result->bind_param("i",$_GET['id']);
+						$result->execute();
+						$row = $result->fetch_row();
 						echo '"'.$row[0].'"';
+						$mysqli->close();
 					}
 					else
 					{
@@ -70,12 +81,15 @@
 				<label class="form-label text">Opis:</label>
 				<textarea class="form-control" rows=10 name="Description">
                 <?php    
-                    $connect = pg_connect();
-					if($connect)
+                    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+					if(!$mysqli->connect_error)
 					{
-						$result = pg_query($connect,"Select description From series Where serie_id=".$_GET['id']);
-						$row = pg_fetch_row($result);
+						$result = $mysqli->prepare("Select description From series Where serie_id=?");
+						$result->bind_param("i",$_GET['id']);
+						$result->execute();
+						$row = $result->fetch_row();
 						echo $row[0];
+						$mysqli->close();
 					}
 					else
 					{

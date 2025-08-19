@@ -2,12 +2,17 @@
     session_start();
     if(!isset($_SESSION['userID']))
     {
-        if($_SESSION['rank'] != 1)
+        header('Location: ../index.php');
+		exit();
+    }
+	else
+	{
+		if($_SESSION['rank'] != 1)
 		{
 			header('Location: ../index.php');
 			exit();
 		}
-    }
+	}
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -46,12 +51,12 @@
 			<h1 class="title" style="color:black;">Widomości od użytkowników</h1>
 			<hr color="red">
 			<?php
-				$connect = pg_connect();
-				if($connect)
+				$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+				if(!$mysqli->connect_error)
 				{
-					$results = pg_query($connect,"Select title, content, date, login, email, message_id From messages natural join users");
+					$results = $mysqli->query("Select title, content, date, login, email, message_id From messages natural join users");
 					$number = 1;
-					while($row1 = pg_fetch_row($results))
+					while($row1 = $results->fetch_row())
 					{
 						echo '<a name="'.$number.'">Wiadomość '.$number.'</a>';
 						echo '<dl class="row">';
@@ -75,6 +80,7 @@
 						echo '<hr color="red">';
 						$number=$number+1;
 					}
+					$mysqli->close();
 				}
 				else
 				{

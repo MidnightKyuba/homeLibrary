@@ -40,7 +40,7 @@
 					}
 					else
 					{
-						echo '<a class="dropdown-item" href="#">Wiadomości</a>';
+						echo '<a class="dropdown-item" href="messages.php">Wiadomości</a>';
 					}
 					?>
 					<a class="dropdown-item" href="../skrypty/logout.php">Wyloguj</a>

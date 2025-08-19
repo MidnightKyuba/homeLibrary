@@ -5,6 +5,14 @@
         header('Location: ../index.php');
 		exit();
     }
+	else
+	{
+		if($_SESSION['rank'] === 3)
+		{
+			header('Location: ../index.php');
+			exit();
+		}
+	}
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -40,7 +48,7 @@
 					}
 					else
 					{
-						echo '<a class="dropdown-item" href="#">Wiadomości</a>';
+						echo '<a class="dropdown-item" href="messages.php">Wiadomości</a>';
 					}
 					?>
 					<a class="dropdown-item" href="../skrypty/logout.php">Wyloguj</a>
@@ -61,12 +69,15 @@
 					<label class="text form-label">Tytuł:</label>
 					<input type="text" name="Title" class="form-control" minlength="1" required value=
 					<?php
-						$connect = pg_connect();
-						if($connect)
+						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+						if(!$mysqli->connect_error)
 						{
-							$results = pg_query($connect,"Select title From allbooks where all_book_id=".$_GET['id']);
-							$row = pg_fetch_row($results);
+							$results = $mysqli->prepare("Select title From allbooks where all_book_id=?");
+							$results->bind_param("i",$_GET['id']);
+							$results->execute();
+							$row = $results->fetch_row();
 							echo '"'.$row[0].'"';
+							$mysqli->close();
 						}
 						else
 						{
@@ -77,13 +88,15 @@
 					<label class="text form-label">Wybierz język książki:</label>
 					<select name="Language" required>
 						<?php
-							$connect = pg_connect();
-							if($connect)
+							$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+							if(!$mysqli->connect_error)
 							{
-								$results = pg_query($connect,"Select * From languages");
-								$clanguage = pg_query($connect,"Select language_id From allbooks Where all_book_id=".$_GET['id']);
-								$row2 = pg_fetch_row($clanguage);
-								while($row1 = pg_fetch_row($results))
+								$results = $mysqli->query("Select * From languages");
+								$clanguage = pg_query("Select language_id From allbooks Where all_book_id=?");
+								$clanguage->bind_param("i",$_GET['id']);
+								$clanguage->execute();
+								$row2 = $clanguage->fetch_row();
+								while($row1 = $results->fetch_row())
 								{
 									if($row1[0] != $row2[0])
 									{
@@ -94,6 +107,7 @@
 										echo '<option value="'.$row1[0].'" selected>Język '.$row1[1].'</option>';
 									}
 								}
+								$mysqli->close();
 							}
 							else
 							{
@@ -105,13 +119,15 @@
 					<label class="text form-label">Wybierz gatunek książki:</label>
 					<select name="Genre" required>
 						<?php
-							$connect = pg_connect();
-							if($connect)
+							$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+							if(!$mysqli->connect_error)
 							{
-								$results = pg_query($connect,"Select * From genres");
-								$cgenre = pg_query($connect,"Select genre_id From allbooks Where all_book_id=".$_GET['id']);
-								$row2 = pg_fetch_row($cgenre);
-								while($row1 = pg_fetch_row($results))
+								$results = $mysqli->query($connect,"Select * From genres");
+								$cgenre = $mysqli->prepare("Select genre_id From allbooks Where all_book_id=?");
+								$cgenre->bind_param("i",$_GET['id']);
+								$cgenre->execute();
+								$row2 = $cgenre->fetch_row();
+								while($row1 = $results->fetch_row())
 								{
 									if($row1[0] != $row2[0])
 									{
@@ -122,6 +138,7 @@
 										echo '<option value="'.$row1[0].'" selected>'.$row1[1].'</option>';
 									}
 								}
+								$mysqli->close();
 							}
 							else
 							{
@@ -134,16 +151,18 @@
 					<br>
 					<label class="text form-label">Wybierz autora książki:</label>
 					<?php
-						$connect = pg_connect();
-						if($connect)
+						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+						if(!$mysqli->connect_error)
 						{
-							$results = pg_query($connect,"Select author_id, name, surname From authors");
-							while($row1 = pg_fetch_row($results))
+							$results = $mysqli->query($connect,"Select author_id, name, surname From authors");
+							while($row1 = $results->fetch_row())
 							{
 								echo '<br>';
 								echo '<input class="check" type="checkbox" name="Authors[]" value="'.$row1[0].'"';
-								$results2 = pg_query($connect,"Select author_id From authorship where all_book_id=".$_GET['id']);
-								while($row2 = pg_fetch_row($results2))
+								$results2 = $mysqli->prepare("Select author_id From authorship where all_book_id=?");
+								$results2->bind_param("i",$_GET['id']);
+								$results2->execute();
+								while($row2 = $results2->fetch_row())
 								{
 									if($row1[0] == $row2[0])
 									{
@@ -153,6 +172,7 @@
 								echo '>';
 								echo '<label class="text form-label">'.$row1[0].'.'.$row1[1].' '.$row1[2].'</label>';
 							}
+							$mysqli->close();
 						}
 						else
 						{
@@ -165,12 +185,14 @@
 					<label class="text form-label">Wybierz serie, do której książka należy:</label>
 					<select name="Serie" required>
 						<?php
-							$connect = pg_connect();
-							if($connect)
+							$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+							if(!$mysqli->connect_error)
 							{
-								$results = pg_query($connect,"Select * From series");
-								$cserie = pg_query($connect,"Select serie_id From allBooks where all_book_id=".$_GET['id']);
-								$row2 = pg_fetch_row($cserie);
+								$results = $mysqli->query($connect,"Select * From series");
+								$cserie = $mysqli->prepare("Select serie_id From allBooks where all_book_id=?");
+								$cserie->bind_param("i",$_GET['id']);
+								$cserie->execute();
+								$row2 = $cserie->fetch_row();
 								while($row1 = pg_fetch_row($results))
 								{
 									if($row1[0] != $row2[0])
@@ -182,6 +204,7 @@
 										echo '<option value="'.$row1[0].'" selected>'.$row1[1].'</option>';
 									}
 								}
+								$mysqli->close();
 							}
 							else
 							{
@@ -196,12 +219,15 @@
 				<label class="text form-label">Wydawca:</label>
 				<input class="form-control" type="text" minlength="1" name="Publisher" value=
 				<?php
-					$connect = pg_connect();
-					if($connect)
+					$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+					if(!$mysqli->connect_error)
 					{
-						$result = pg_query($connect,"Select publisher From allbooks Where all_book_id=".$_GET['id']);
-						$row = pg_fetch_row($result);
+						$result = $mysqli->prepare("Select publisher From allbooks Where all_book_id=?");
+						$result->bind_param("i",$_GET['id']);
+						$result->execute();
+						$row = $result->fetch_row();
 						echo '"'.$row[0].'"';
+						$mysqli->close();
 					}
 					else
 					{
@@ -212,12 +238,15 @@
 				<label class="text form-label">Data wydania:</label>
 				<input class="form-control" type="date" name="PublishDate" value=
 				<?php
-					$connect = pg_connect();
-					if($connect)
+					$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+					if(!$mysqli->connect_error)
 					{
-						$result = pg_query($connect,"Select publish_date From allbooks Where all_book_id=".$_GET['id']);
-						$row = pg_fetch_row($result);
+						$result = $mysqli->prepare("Select publish_date From allbooks Where all_book_id=?");
+						$result->bind_param("i",$_GET['id']);
+						$result->execute();
+						$row = $result->fetch_row();
 						echo '"'.$row[0].'"';
+						$mysqli->close();
 					}
 					else
 					{
@@ -228,12 +257,15 @@
 				<label class="text form-label">Ilość stron:</label>
 				<input class="form-control" type="number" value=
 				<?php
-					$connect = pg_connect();
-					if($connect)
+					$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+					if(!$mysqli->connect_error)
 					{
-						$result = pg_query($connect,"Select pages From allbooks Where all_book_id=".$_GET['id']);
-						$row = pg_fetch_row($result);
+						$result = $mysqli->prepare("Select pages From allbooks Where all_book_id=?");
+						$result->bind_param("i",$_GET['id']);
+						$result->execute();
+						$row = $result->fetch_row();
 						echo '"'.$row[0].'"';
+						$mysqli->close();
 					}
 					else
 					{
@@ -244,12 +276,15 @@
 				<label class="text form-label">Opis:</label>
 				<textarea class="form-control" rows="10" name="Description">
 				<?php
-					$connect = pg_connect();
-					if($connect)
+					$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+					if(!$mysqli->connect_error)
 					{
-						$result = pg_query($connect,"Select description From allbooks Where all_book_id=".$_GET['id']);
-						$row = pg_fetch_row($result);
+						$result = $mysqli->prepare("Select description From allbooks Where all_book_id=?");
+						$result->bind_param("i",$_GET['id']);
+						$result->execute();
+						$row = $result->fetch_row();
 						echo $row[0];
+						$mysqli->close();
 					}
 					else
 					{
