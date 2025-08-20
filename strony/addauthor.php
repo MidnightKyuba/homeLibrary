@@ -5,6 +5,14 @@
         header('Location: ../index.php');
 		exit();
     }
+	else
+	{
+		if($_SESSION['rank'] === 3)
+		{
+			header('Location: ../index.php');
+			exit();
+		}
+	}
 ?>
 <!DOCTYPE html>
 <html lang="pl">

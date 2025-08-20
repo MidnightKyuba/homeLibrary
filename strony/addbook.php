@@ -5,6 +5,14 @@
         header('Location: ../index.php');
 		exit();
     }
+	else
+	{
+		if($_SESSION['rank'] === 3)
+		{
+			header('Location: ../index.php');
+			exit();
+		}
+	}
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -59,14 +67,15 @@
 					<label class="text form-label">Wybierz język książki:</label>
 					<select name="Language" required>
 						<?php
-							$connect = pg_connect();
-							if($connect)
+							$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+    						if(!$mysqli->connect_error)
 							{
-								$results = pg_query($connect,"Select * From languages");
-								while ($row = pg_fetch_row($results)) 
+								$results = $mysqli->query("Select * From languages");
+								while ($row = $results->fetch_row()) 
 								{
 									echo '<option value="'.$row[0].'">Język '.$row[1].'</option>';
 								}
+								$mysqli->close();
 							}
 							else
 							{
@@ -78,14 +87,15 @@
 					<label class="text form-label">Wybierz gatunek książki:</label>
 					<select name="Genre" required>
 						<?php
-							$connect = pg_connect();
-							if($connect)
+							$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+    						if(!$mysqli->connect_error)
 							{
-								$results = pg_query($connect,"Select * From genres");
-								while ($row = pg_fetch_row($results))
+								$results = $$mysqli->query("Select * From genres");
+								while ($row = $results->fetch_row())
 								{
 									echo '<option value="'.$row[0].'">'.$row[1].'</option>';
 								}
+								$mysqli->close();
 							}
 							else
 							{
@@ -99,16 +109,17 @@
 					<label class="text form-label">Wybierz autora książki:</label>
 					<br>
 					<?php
-						$connect = pg_connect();
-						if($connect)
+						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+						if(!$mysqli->connect_error)
 						{
-							$results = pg_query($connect,"Select author_id, name, surname From authors");
-							while($row = pg_fetch_row($results))
+							$results = $mysqli->query($connect,"Select author_id, name, surname From authors");
+							while($row = $results->fetch_row())
 							{
 								echo '<input class="check" type="checkbox" name="Authors[]" value="'.$row[0].'" required>';
 								echo '<label class="text form-label">'.$row[0].'.'.$row[1].' '.$row[2].'</label>';
 								echo '<br>';
 							}
+							$mysqli->close();
 						}
 						else
 						{
@@ -120,11 +131,11 @@
 					<label class="text form-label">Wybierz serie, do której książka należy:</label>
 					<select name="Serie" required>
 						<?php
-							$connect = pg_connect();
-							if($connect)
+							$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+							if(!$mysqli->connect_error)
 							{
-								$results = pg_query($connect,"Select serie_id, name From series");
-								while($row = pg_fetch_row($results))
+								$results = $mysqli->query("Select serie_id, name From series");
+								while($row = $results->fetch_row())
 								{
 									echo '<option value="'.$row[0].'">'.$row[1].'</option>';
 								}

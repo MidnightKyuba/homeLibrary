@@ -51,15 +51,22 @@
 	<div class="row main">
 		<div class="offset-xl-3 col-xl-6 offset-lg-2 col-lg-8 offset-md-1 col-ml-10 col-sm-12 col-12 mainlight">
 			<?php
-				$connect = pg_connect();
-				if($connect)
+				$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+    			if(!$mysqli->connect_error)
 				{
-					$results = pg_query($connect,"Select * from authors where author_id=".$_GET['id']);
-					$row = pg_fetch_row($results);
+					$results = $mysqli->prepare("Select * from authors where author_id=?");
+					$results->bind_param("i",$_GET['id']);
+					$results->execute();
+					$row = $results->fetch_row();
 					echo '<p class="text">Imiona: '.$row[1].'<br>Nazwisko: '.$row[2].'<br>Data urodzenia: '.$row[3].'<br>Data śmierci: '.$row[4].'<br>Życiorys:<br>'.$row[5].'</p><hr>';
-					echo '<a href="./editauthor.php?id='.$_GET['id'].'" class="btn btn-primary text">Edytuj dane autora</a>';
-					$results = pg_query($connect,"Select cover, title, a.all_book_id, s.name as serie from allbooks a inner join authorship ash on a.all_book_id = ash.all_book_id inner join series s on s.serie_id = a.serie_id where author_id=".$_GET['id']);
-					while($row = pg_fetch_row($results))
+					if($_SESSION['rank']<3)
+					{
+						echo '<a href="./editauthor.php?id='.$_GET['id'].'" class="btn btn-primary text">Edytuj dane autora</a>';
+					}
+					$results = $mysqli->prepare("Select cover, title, a.all_book_id, s.name as serie from allbooks a inner join authorship ash on a.all_book_id = ash.all_book_id inner join series s on s.serie_id = a.serie_id where author_id=?");
+					$results->bind_param("i",$_GET['id']);
+					$results->execute();
+					while($row = $results->fetch_row())
 					{
 						echo '<div class="card col-12 col-sm-12 col-md-6 col-lg-4 col-xl-4">';
 							if(!empty($row[0]))
@@ -73,8 +80,10 @@
 							echo '<div class="card-body">';
 								echo '<h5 class="card-title">'.$row[1].'</h5>';
 								echo '<p class="card-text text">Autor:<br>';
-								$results2 = pg_query($connect,"Select name, surname from authors natural join authorship where all_book_id=".$row[2]);
-								while($row2 = pg_fetch_row($results2))
+								$results2 = $mysqli->prepare("Select name, surname from authors natural join authorship where all_book_id=?");
+								$results2->bind_param("i",$row[2]);
+								$results2->execute();
+								while($row2 = $results2->fetch_row())
 								{
 									echo $row2[0]." ".$row2[1]."<br>";
 								}
@@ -83,6 +92,7 @@
 							echo '</div>';
 						echo '</div>';
 					}
+					$mysqli->close();
 				}
 				else
 				{

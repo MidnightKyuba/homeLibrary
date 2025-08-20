@@ -51,12 +51,16 @@
 	<div class="row main">
 		<div class="offset-xl-3 col-xl-6 offset-lg-2 col-lg-8 offset-md-1 col-ml-10 col-sm-12 col-12 mainlight">
 			<?php
-				$connect = pg_connect();
-				if($connect)
+				$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+    			if(!$mysqli->connect_error)
 				{
-					$result1 = pg_query($connect,"Select all_book_id, cover, title, l.name as language, g.name as genre, s.serie_id, s.name as serie, publisher, publish_date, pages, a.description from allbooks a inner join languages l on l.language_id=a.language_id inner join genres g on g.genre_id=a.genre_id inner join series s on s.serie_id = a.serie_id where all_book_id=".$_GET['id']);
-					$row1 = pg_fetch_row($result1);
-					$results2 = pg_query($connect,"Select author_id, name, surname from authors natural join authorship where all_book_id=".$_GET['id']);
+					$result1 = $mysqli->prepare("Select all_book_id, cover, title, l.name as language, g.name as genre, s.serie_id, s.name as serie, publisher, publish_date, pages, a.description from allbooks a inner join languages l on l.language_id=a.language_id inner join genres g on g.genre_id=a.genre_id inner join series s on s.serie_id = a.serie_id where all_book_id=?");
+					$result1->bind_param("i",$_GET['id']);
+					$result1->execute();
+					$row1 = $result1->fetch_row();
+					$results2 = $mysqli->prepare("Select author_id, name, surname from authors natural join authorship where all_book_id=?");
+					$results2->bind_param("i",$_GET['id']);
+					$results2->execute();
 					if(!empty($row1[1]))
 					{
 						echo '<img class="image-fluid col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" src="../grafika/okladki/'.$row1[1].'?'.filemtime('../grafika/okladki/'.$row1[1]).'">';
@@ -66,7 +70,7 @@
 						echo '<img class="image-fluid col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" src="../grafika/null.png">';
 					}
 					echo '<p class="text">Tytuł: '.$row1[2].'<br>Autorzy: <br>';
-					while($row2 = pg_fetch_row($results2))
+					while($row2 = $results2->fetch_row())
 					{
 						echo '<a href="authorinfo.php?id='.$row2[0].'">'.$row2[1].' '.$row2[2].'</a>';
 						echo '<br>';
@@ -86,6 +90,7 @@
 					{
 					echo '<a class="text btn btn-primary" href="editbook.php?id='.$row1[0].'">Edytuj informacje</a>';
 					}
+					$mysqli->close();
 				}
 				else
 				{

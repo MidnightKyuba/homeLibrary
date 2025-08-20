@@ -5,6 +5,14 @@
         header('Location: ../index.php');
 		exit();
     }
+	else
+	{
+		if($_SESSION['rank'] === 3)
+		{
+			header('Location: ../index.php');
+			exit();
+		}
+	}
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -53,12 +61,19 @@
 				<label class="form-label text">Imie:</label>
 				<input class="form-control" type="text" minlenght="1" required name="Name" value=
 					<?php
-						$connect = pg_connect();
-						if($connect)
+						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+						if(!$mysqli->connect_error)
 						{
-							$results = pg_query($connect,"Select name from authors where author_id=".$_GET['id']);
-							$row = pg_fetch_row($results);
+							$results = $mysqli->prepare("Select name from authors where author_id=?");
+							$results->bind_param("i",$_GET['id']);
+							$results->execute();
+							$row = $results->fetch_row();
 							echo '"'.$row[0].'"';
+							$mysqli->close();
+						}
+						else
+						{
+							echo "<p class='text'>Nie można połączyć z bazą</p>";
 						}
 					?>
 				>
@@ -66,12 +81,19 @@
 				<label class="form-label text">Nazwisko:</label>
 				<input class="form-control" type="text" minlenght="1" required name="Surname" value=
 					<?php
-						$connect = pg_connect();
-						if($connect)
+						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+						if(!$mysqli->connect_error)
 						{
-							$results = pg_query($connect,"Select surname from authors where author_id=".$_GET['id']);
-							$row = pg_fetch_row($results);
+							$results = $mysqli->prepare("Select surname from authors where author_id=?");
+							$results->bind_param("i",$_GET['id']);
+							$results->execute();
+							$row = $results->fetch_row();
 							echo '"'.$row[0].'"';
+							$mysqli->close();
+						}
+						else
+						{
+							echo "<p class='text'>Nie można połączyć z bazą</p>";
 						}
 					?>
 				>
@@ -79,12 +101,19 @@
 				<label class="form-label text">Data urodzenia:</label>
 				<input class="form-control" type="date" name="Birth" value=
 					<?php
-						$connect = pg_connect();
-						if($connect)
+						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+						if(!$mysqli->connect_error)
 						{
-							$results = pg_query($connect,"Select birth_date from authors where author_id=".$_GET['id']);
-							$row = pg_fetch_row($results);
+							$results = $mysqli->prepare("Select birth_date from authors where author_id=?");
+							$results->bind_param("i",$_GET['id']);
+							$results->execute();
+							$row = $results->fetch_row();
 							echo '"'.$row[0].'"';
+							$mysqli->close();
+						}
+						else
+						{
+							echo "<p class='text'>Nie można połączyć z bazą</p>";
 						}
 					?>
 				>
@@ -92,30 +121,44 @@
 				<label class="form-label text">Czy autor nie żyje?</label><br>
 				<input type="radio" id="dy" name="ifDeath" value="true" onclick="enableElement('Death');" 
 					<?php
-						$connect = pg_connect();
-						if($connect)
+						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+						if(!$mysqli->connect_error)
 						{
-							$results = pg_query($connect,"Select death_date from authors where author_id=".$_GET['id']);
-							$row = pg_fetch_row($results);
+							$results = $mysqli->prepare("Select death_date from authors where author_id=?");
+							$results->bind_param("i",$_GET['id']);
+							$results->execute();
+							$row = $results->fetch_row();
 							if($row[0] != null)
 							{
 								echo 'checked';
 							}
+							$mysqli->close();
+						}
+						else
+						{
+							echo "<p class='text'>Nie można połączyć z bazą</p>";
 						}
 					?>
 				>
 				<label class="form-label text" for="dy">Yes</label><br>
 				<input type="radio" id="dn" name="ifDeath" value="false" onclick="disableElement('Death');" 
 					<?php
-						$connect = pg_connect();
-						if($connect)
+						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+						if(!$mysqli->connect_error)
 						{
-							$results = pg_query($connect,"Select death_date from authors where author_id=".$_GET['id']);
-							$row = pg_fetch_row($results);
+							$results = $mysqli->prepare("Select death_date from authors where author_id=?");
+							$results->bind_param("i",$_GET['id']);
+							$results->execute();
+							$row = $results->fetch_row();
 							if($row[0] == null)
 							{
 								echo 'checked';
 							}
+							$mysqli->close();
+						}
+						else
+						{
+							echo "<p class='text'>Nie można połączyć z bazą</p>";
 						}
 					?>
 				>
@@ -124,11 +167,13 @@
 				<label class="form-label text">Data śmierci:</label>
 				<input class="form-control" id="Death" type="date" name="Death" 
 					<?php
-						$connect = pg_connect();
-						if($connect)
+						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+						if(!$mysqli->connect_error)
 						{
-							$results = pg_query($connect,"Select death_date from authors where author_id=".$_GET['id']);
-							$row = pg_fetch_row($results);
+							$results = $mysqli->prepare("Select death_date from authors where author_id=?");
+							$results->bind_param("i",$_GET['id']);
+							$results->execute();
+							$row = $results->fetch_row();
 							if($row[0] == null)
 							{
 								echo 'disabled';
@@ -137,6 +182,11 @@
 							{
 								echo 'value="'.$row[0].'"';
 							}
+							$mysqli->close();
+						}
+						else
+						{
+							echo "<p class='text'>Nie można połączyć z bazą</p>";
 						}
 					?>
 				>
@@ -144,15 +194,18 @@
 				<label class="form-label text">Życiorys:</label>
 				<textarea class="form-control" rows="10" name="Life">
 					<?php
-						$connect = pg_connect();
-						if($connect)
+						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+						if(!$mysqli->connect_error)
 						{
-							$results = pg_query($connect,"Select life from authors where author_id=".$_GET['id']."");
-							$row = pg_fetch_row($results);
+							$results = $mysqli->prepare("Select life from authors where author_id=?");
+							$results->bind_param("i",$_GET['id']);
+							$results->execute();
+							$row = $results->fetch_row();
 							if(!empty($row[0]))
 							{
 								echo '"'.$row[0].'"';
 							}
+							$mysqli->close();
 						}
 						else
 						{
