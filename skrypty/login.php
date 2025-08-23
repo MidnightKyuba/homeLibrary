@@ -1,29 +1,35 @@
 <?php
     session_start();
-    $connect = pg_connect();
-    if($connect)
+    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+    if(!$mysqli->connect_error)
     {
-        $result = pg_query($connect,"SELECT user_id FROM users WHERE Login = '".$_POST['Login']."'");
-		$userID = pg_fetch_row($result);
+        $result = $mysqli->prepare("SELECT user_id FROM users WHERE Login = ?");
+        $result->bind_param("s",$_POST['Login']);
+        $result->execute();
+		$userID = $result->fetch_row();
         if(!empty($userID[0]))
         {
-			$result = pg_query($connect,"SELECT password FROM users WHERE user_id = ".$userID[0]."");
-			$checkPassword = pg_fetch_row($result);
+			$result = $mysqli->prapare("SELECT password FROM users WHERE user_id = ?");
+            $result->bind_param("s",$userID[0]);
+            $result->execute();
+			$checkPassword = $result->fetch_row();
             if(password_verify($_POST['Password'],$checkPassword[0]))
             {
-				$result = pg_query($connect,"SELECT rank_id FROM users WHERE user_id = ".$userID[0]."");
-				$rank = pg_fetch_row($result);
+				$result = $mysqli->prepare("SELECT rank_id FROM users WHERE user_id = ?");
+                $result->bind_param("i", $userID[0]);
+                $result->execute();
+				$rank = $result->fetch_row();
 				$_SESSION['login'] = $_POST['Login'];
                 $_SESSION['userID'] = $userID[0];
 				$_SESSION['rank'] = $rank[0];
-                pg_close();
+                $mysqli->close();
                 header('Location: ../strony/mainmenu.php');
 				exit();
             }
 			else
 			{
 				$_SESSION['error'] = 'LF';
-				pg_close();
+				$mysqli->close();
 				header('Location: ../index.php');
 				exit();
 			}
@@ -31,7 +37,7 @@
         else
         {
             $_SESSION['error'] = 'LF';
-            pg_close();
+            $mysqli->close();
             header('Location: ../index.php');
 			exit();
         }

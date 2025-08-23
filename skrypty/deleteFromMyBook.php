@@ -1,10 +1,12 @@
 <?php
-    $connect = pg_connect();
+    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-	if($connect)
+	if(!$mysqli->connect_error)
     {
-        pg_query($connect,"Delete from copies where copy_id=".$_POST['CopyID']."");
-        pg_close();
+        $query = $mysqli->prepare("Delete from copies where copy_id=?");
+        $query->bind_param("i",$_POST['CopyID']);
+        $query->execute();
+        $mysqli->close();
         header('Location: ../strony/mybooks.php');
         exit();
     }

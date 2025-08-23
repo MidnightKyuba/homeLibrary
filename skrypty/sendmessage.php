@@ -1,11 +1,13 @@
 <?php
-    $connect = pg_connect();
+    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-	if($connect)
+	if(!$mysqli->connect_error)
     {
         $currentDate = date("Y-m-d");
-        pg_query($connect, "INSERT INTO messages (user_id, title, content, date) VALUES (".$_SESSION['userID'].", '".str_replace("'","''",$_POST['Title'])."', '".str_replace("'","''",$_POST['Content'])."', '".$currentDate."')");
-        pg_close();
+        $query = $mysqli->prepare("INSERT INTO messages (user_id, title, content, date) VALUE (?,?,?,?)");
+        $query->bind_param("isss",$_SESSION['userID'],$_POST['Title'],$_POST['Content'],$currentDate);
+        $query->execute();
+        $mysqli->close();
         header('Location: ../strony/contact.php?m=send');
         exit;
     }

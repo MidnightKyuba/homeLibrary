@@ -1,10 +1,12 @@
 <?php
-    $connect = pg_connect();
+    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-	if($connect)
+	if(!$mysqli->connect_error)
     {
-        pg_query($connect, "UPDATE copies SET who_reading='".$_POST['Reader']."' where copy_id=".$_POST['CopyID']."");
-        pg_close();
+        $query = $mysqli->prepare("UPDATE copies SET who_reading=? where copy_id=?");
+        $query->bind_param("si",$_POST['Reader'],$_POST['CopyID']);
+        $query->execute();
+        $mysqli->close();
         header('Location: ../strony/mybookinfo.php?id='.$_POST['CopyID'].'');
         exit;
     }

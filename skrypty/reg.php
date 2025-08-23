@@ -1,23 +1,31 @@
 <?php
-    $connect = pg_connect();
+    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-    if($connect)
+    if(!$mysqli->connect_error)
     {   
-        $result = pg_query($connect,"SELECT user_id FROM users WHERE login ='".$_POST['Login']."'");
-		$userID = pg_fetch_row($result);
+        $result = $mysqli->prepare("SELECT user_id FROM users WHERE login = ?");
+        $result->bind_param("s",$_POST['Login']);
+        $result->execute();
+		$userID = $result->fetch_row();
         if(empty($userID[0]))
         {
             if($_POST['Password'] == $_POST['ControlPassword'])
             {
 				$password = password_hash($_POST['Password'],PASSWORD_BCRYPT);
-                pg_query($connect,"INSERT INTO users(login, password, rank_id, email) VALUES ('".$_POST['Login']."','".$password."', 3,'".$_POST['Email']."')");
-                $result = pg_query($connect,"SELECT user_id FROM users WHERE Login = '".$_POST['Login']."'");
-				$userID = pg_fetch_row($result);
-				$result = pg_query($connect,"SELECT rank_id FROM users WHERE user_id = ".$userID[0]."");
-				$rank = pg_fetch_row($result);
-				pg_close();
-				$_SESSION['userID'] = $userID[0];
-				$_SESSION['login'] = $_POST['Login'];
+                $query = $mysqli->prepare("INSERT INTO users(login, password, rank_id, email) VALUES (?,?, 3,?)");
+                $query->bind_param("sss",$_POST['Login'],$password,$_POST['Email']);
+                $query->execute();
+                $result = $mysqli->prepare("SELECT user_id, login FROM users WHERE Login = ?");
+                $result->bind_param("s",$_POST['Login']);
+                $result->execute();
+				$user = $result->fetch_row();
+				$result = $mysqli->prepare("SELECT rank_id FROM users WHERE user_id = ?");
+                $result->bind_param("i",$user[0]);
+                $result->execute();
+				$rank = $result->fetch_row();
+				$mysqli->close();
+				$_SESSION['userID'] = $user[0];
+				$_SESSION['login'] = $user[1];
 				$_SESSION['rank'] = $rank[0];
 				header('Location: ../strony/mainmenu.php');
 				exit();
@@ -25,7 +33,7 @@
             else
             {
                 $_SESSION['error'] = 'RF';
-                pg_close();
+                $mysqli->close();
 				header('Location: ../strony/reg.php');
 				exit();
             }
@@ -33,7 +41,7 @@
         else
         {
             $_SESSION['error'] = 'RF';
-            pg_close();
+            $mysqli->close();
 			header('Location: ../strony/reg.php');
 			exit();
         }

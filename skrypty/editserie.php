@@ -1,14 +1,18 @@
 <?php
-    $connect = pg_connect();
+    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-	if($connect)
+	if(!$mysqli->connect_error)
     {
-        pg_query($connect,"UPDATE series SET name='".str_replace("'","''",$_POST['Name'])."' WHERE serie_id=".$_POST['SerieID']."");
+        $query = $mysqli->prepare("UPDATE series SET name=? WHERE serie_id=?");
+        $query->bind_param("si",$_POST['Name'],$_POST['SerieID']);
+        $query->execute();
         if(!empty($_POST['Description']))
         {
-            pg_query($connect,"UPDATE series SET description='".str_replace("'","''",$_POST['Description'])."' WHERE serie_id=".$_POST['SerieID']."");
+            $query = $mysqli->prepare("UPDATE series SET description=? WHERE serie_id=?");
+            $query->bind_param("si",$_POST['Description'],$_POST['SerieID']);
+            $query->execute();
         }
-        pg_close();
+        $mysqli->close();
         header('Location: ../strony/seriesinfo.php?id='.$_POST['SerieID'].'');
 		exit();
     }

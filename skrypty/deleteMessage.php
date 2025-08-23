@@ -1,10 +1,12 @@
 <?php
-    $connect = pg_connect();
+    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-	if($connect)
+	if(!$mysqli->connect_error)
     {
-        pg_query($connect,"Delete from messages where message_id=".$_POST['MessageId']."");
-        pg_close();
+        $query = $mysqli->prepare("Delete from messages where message_id=?");
+        $query->bind_param("i",$_POST['MessageId']);
+        $query->execute();
+        $mysqli->close();
         header('Location: ../strony/messages.php#'.$_POST['Number'].'');
         exit();
     }
