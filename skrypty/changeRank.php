@@ -1,10 +1,12 @@
 <?php
-    $connect = pg_connect();
+    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-	if($connect)
+	if(!$mysqli->connect_error)
     {
-        pg_query($connect, "Update users set rank_id=".$_POST['RankId']." where user_id=".$_POST['UserId']."");
-        pg_close();
+        $query = $mysqli->prepare("Update users set rank_id=? where user_id=?");
+        $query->bind_param("ii",$_POST['RankId'],$_POST['UserId']);
+        $query->execute();
+        $mysqli->close();
         header('Location: ../strony/profile.php?m=changeRank');
         exit();
     }

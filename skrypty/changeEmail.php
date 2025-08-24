@@ -1,10 +1,12 @@
 <?php
-	$connect = pg_connect();
+	$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-	if($connect)
+	if(!$mysqli->connect_error)
     {
-        pg_query($connect,"UPDATE users SET email='".$_POST['Email']."' WHERE user_id=".$_SESSION['userID']."");
-        pg_close();
+        $query = $mysqli->prepare("UPDATE users SET email=? WHERE user_id=?");
+        $query->bind_param("si",$_POST['Email'],$_SESSION['userID']);
+        $query->execute();
+        $mysqli->close();
 		header('Location: ../strony/profile.php');
 		exit();
     }

@@ -1,10 +1,12 @@
 <?php
-    $connect = pg_connect();
+    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-	if($connect)
+	if(!$mysqli->connect_error)
     {
-        pg_query($connect, "INSERT INTO copies (all_book_id, user_id) VALUES (".$_POST['BookID'].",".$_SESSION['userID'].")");
-        pg_close();
+        $query = $mysqli->prepare("INSERT INTO copies (all_book_id, user_id) VALUES (?,?)");
+        $query->bind_param("ii",$_POST['BookID'],$_SESSION['userID']);
+        $query->execute();
+        $mysqli->close();
         header('Location: ../strony/bookinfo.php?id='.$_POST['BookID'].'');
 		exit();
     }

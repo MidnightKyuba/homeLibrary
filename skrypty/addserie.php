@@ -1,10 +1,12 @@
 <?php
-    $connect = pg_connect();
+    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-	if($connect)
+	if(!$mysqli->connect_error)
     {
-        pg_query($connect, "INSERT INTO series (name, description) VALUES ('".str_replace("'","''",$_POST['Name'])."','".str_replace("'","''",$_POST['Description'])."')");
-        pg_close();
+        $query = $mysqli->prepare("INSERT INTO series (name, description) VALUES (?,?)");
+        $query->bind_param('ss',$_POST['Name'],$_POST['Description']);
+        $query->execute();
+        $mysqli->close();
         echo '<script type="text/javascript">';
         echo 'window.close();';
         echo '</script>';

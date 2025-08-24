@@ -1,10 +1,12 @@
 <?php
-    $connect = pg_connect();
+    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-	if($connect)
+	if(!$mysqli->connect_error)
     {
-        pg_query($connect,"INSERT INTO genres (name) VALUES ('".str_replace("'","''",$_POST['Name'])."')");
-        pg_close();
+        $query = $mysqli->prepare("INSERT INTO genres (name) VALUES (?)");
+        $query->bind_param("s",$_POST['Name']);
+        $query->execute();
+        $mysqli->close();
         echo '<script type="text/javascript">';
         echo 'window.close();';
         echo '</script>';
