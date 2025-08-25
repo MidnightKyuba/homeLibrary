@@ -1,45 +1,65 @@
 <?php
-    $connect = pg_connect();
+    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-	if($connect)
+	if(!$mysqli->connect_error)
     {
-        pg_query($connect, "UPDATE allbooks SET title='".str_replace("'","''",$_POST['Title'])."', language_id=".$_POST['Language'].", genre_id=".$_POST['Genre'].", serie_id=".$_POST['Serie']." where all_book_id=".$_POST['BookID']);
+        $query = $mysqli->prepare("UPDATE allbooks SET title=?, language_id=?, genre_id=?, serie_id=? where all_book_id=?");
+        $query->bind_param("siiii",$_POST['Title'],$_POST['Language'],$_POST['Genre'],$_POST['Serie'],$_POST['BookID']);
+        $query->execute();
         if(!empty($_POST['Pages']))
         {
-            pg_query($connect, "UPDATE allbooks SET pages=".$_POST['Pages']." where all_book_id=".$_POST['BookID']);
+            $query = $mysqli->prepare("UPDATE allbooks SET pages=? where all_book_id=?");
+            $query->bind_param("ii",$_POST['Pages'],$_POST['BookID']);
+            $query->execute();
         }
         else
         {
-            pg_query($connect, "UPDATE allbooks SET pages=null where all_book_id=".$_POST['BookID']);
+            $query = $mysqli->prepare("UPDATE allbooks SET pages=null where all_book_id=?");
+            $query->bind_param("i",$_POST['BookID']);
+            $query->execute();
         }
         if(!empty($_POST['Publisher']))
         {
-            pg_query($connect, "UPDATE allbooks SET publisher='".str_replace("'","''",$_POST['Publisher'])."' where all_book_id=".$_POST['BookID']);
+            $query = $mysqli->prepare("UPDATE allbooks SET publisher=? where all_book_id=?");
+            $query->bind_param("si",$_POST['Publisher'],$_POST['BookID']);
+            $query->execute();
         }
         else
         {
-            pg_query($connect, "UPDATE allbooks SET publisher=null where all_book_id=".$_POST['BookID']);
+            $query = $mysqli->prepare("UPDATE allbooks SET publisher=null where all_book_id=?");
+            $query->bind_param("i",$_POST['BookID']);
+            $query->execute();
         }
         if(!empty($_POST['PublishDate']))
         {
-            pg_query($connect, "UPDATE allbooks SET publish_date='".$_POST['PublishDate']."' where all_book_id=".$_POST['BookID']);
+            $query = $mysqli->prepare("UPDATE allbooks SET publish_date=? where all_book_id=?");
+            $query->bind_param("si",$_POST['PublishDate'],$_POST['BookID']);
+            $query->execute();
         }
         else
         {
-            pg_query($connect, "UPDATE allbooks SET publish_date=null where all_book_id=".$_POST['BookID']);
+            $query = $mysqli->prepare("UPDATE allbooks SET publish_date=null where all_book_id=?");
+            $query->bind_param("i",$_POST['BookID']);
+            $query->execute();
         }
         if(!empty($_POST['Description']))
         {
-            pg_query($connect, "UPDATE allbooks SET description='".str_replace("'","''",$_POST['Description'])."' where all_book_id=".$_POST['BookID']);
+            $query = $mysqli->prepare("UPDATE allbooks SET description=? where all_book_id=?");
+            $query->bind_param("si",$_POST['Description'],$_POST['BookID']);
+            $query->execute();
         }
         else
         {
-            pg_query($connect, "UPDATE allbooks SET decription=null where all_book_id=".$_POST['BookID']);
+            $query = $mysqli->prepare("UPDATE allbooks SET description=null where all_book_id=?");
+            $query->bind_param("i",$_POST['BookID']);
+            $query->execute();
         }
         if(is_uploaded_file($_FILES['Cover']['tmp_name']))
         {
-            $result = pg_query($connect, "SELECT cover FROM allbooks WHERE all_book_id=".$_POST['BookID']);
-            $cover = pg_fetch_row($result);
+            $result = $mysqli->prepare("SELECT cover FROM allbooks WHERE all_book_id=?");
+            $result->bind_param("i",$_POST['BookID']);
+            $result->execute();
+            $cover = $result->fetch_row();
             if(!empty($cover[0]))
             {
                 if(file_exists("../grafika/okladki/".$cover[0]))
@@ -67,15 +87,21 @@
                 }
             }
             $coverFileName = 'cover'.$i.'.'.$ext;
-            pg_query($connect, "UPDATE allbooks SET cover='".$coverFileName."' where all_book_id=".$_POST['BookID']);
+            $query = $mysqli->prepare("UPDATE allbooks SET cover=? where all_book_id=?");
+            $query->bind_param("si",$coverFileName,$_POST['BookID']);
+            $query->execute();
             move_uploaded_file($_FILES['Cover']['tmp_name'], $folderPath.$coverFileName);
         }
-        pg_query($connect, "DELETE FROM authorship WHERE all_book_id=".$_POST['BookID']);
+        $query = $mysqli->prepare("DELETE FROM authorship WHERE all_book_id=?");
+        $query->bind_param("i",$_POST['BookID']);
+        $query->execute();
         foreach($_POST['Authors'] as $author)
         {
-            pg_query($connect, "INSERT INTO authorship (all_book_id, author_id) VALUES (".$_POST['BookID'].",".$author.")");
+            $query = $mysqli->prepare("INSERT INTO authorship (all_book_id, author_id) VALUES (?,?)");
+            $query->bind_param("ii",$_POST['BookID'],$author);
+            $query->execute();
         }
-        pg_close();
+        $mysqli->close();
         header('Location: ../strony/bookinfo.php?id='.$_POST['BookID']);
         exit();
     }

@@ -1,40 +1,40 @@
 <?php
-    $connect = pg_connect();
+    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-	if($connect)
+	if(!$mysqli->connect_error)
     {
-        $query = "INSERT INTO allbooks (title, language_id, genre_id, serie_id, pages, publisher, publish_date, description, cover) VALUES ('".str_replace("'","''",$_POST['Title'])."',".$_POST['Language'].",".$_POST['Genre'].",".$_POST['Serie'].",";
+        $query = $mysqli->prepare("INSERT INTO allbooks (title, language_id, genre_id, serie_id, pages, publisher, publish_date, description, cover) VALUES (?,?,?,?,?,?,?,?,?) RETURNING all_book_id");
         if(!empty($_POST['Pages']))
         {
-            $query = $query.$_POST['Pages'].",";
+            $pages = $_POST['Pages'];
         }
         else
         {
-            $query = $query."null,";
+            $pages = null;
         }
         if(!empty($_POST['Publisher']))
         {
-            $query = $query."'".str_replace("'","''",$_POST['Publisher'])."',";
+            $publisher = $_POST['Publisher'];
         }
         else
         {
-            $query = $query."null,";
+            $publisher = null;
         }
         if(!empty($_POST['PublishDate']))
         {
-            $query = $query."'".$_POST['PublishDate']."',";
+            $publishDate = $_POST['PublishDate'];
         }
         else
         {
-            $query = $query."null,";
+            $publishDate = null;
         }
         if(!empty($_POST['Description']))
         {
-            $query = $query."'".str_replace("'","''",$_POST['Description'])."',";
+            $description = $_POST['Description'];
         }
         else
         {
-            $query = $query."null,";
+            $description = null;
         }
         if(is_uploaded_file($_FILES['Cover']['tmp_name']))
         {
@@ -59,21 +59,22 @@
                 }
             }
             $coverFileName = 'cover'.$i.'.'.$ext;
-            $query = $query."'".$coverFileName."')";
             move_uploaded_file($_FILES['Cover']['tmp_name'], $folderPath.$coverFileName);
         }
         else
         {
-            $query = $query."null) ";
+            $coverFileName = null;
         }
-        $query = $query." RETURNING all_book_id";
-        $result = pg_query($connect, $query);
-        $bookid = pg_fetch_row($result);
+        $query->bind_param("siiiissss",$_POST['Title'],$_POST['Language'],$_POST['Genre'],$_POST['Serie'],$pages,$publisher,$publishDate,$description,$coverFileName);
+        $query->execute();
+        $bookid = $query->fetch_row();
         foreach($_POST['Authors'] as $author)
         {
-            pg_query($connect, "INSERT INTO authorship (all_book_id, author_id) VALUES (".$bookid[0].",".$author.")");
+            $query = $mysqli->prepare("INSERT INTO authorship (all_book_id, author_id) VALUES (?,?)");
+            $query->bind_param("ii",$bookid[0],$author);
+            $query->execute();
         }
-        pg_close();
+        $mysqli->close();
         header('Location: ../strony/booksbase.php');
         exit();
     }

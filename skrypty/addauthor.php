@@ -1,46 +1,45 @@
 <?php
-	$connect = pg_connect();
+	$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-	if($connect)
+	if(!$mysqli->connect_error)
     {
-        $query = "INSERT INTO authors (name, surname, birth_date, death_date, life) VALUES ('";
-        $query =$query.str_replace("'", "''", $_POST['Name']);
-		$query =$query."','";
-		$query =$query.str_replace("'", "''",$_POST['Surname']);
-		$query =$query."',";
+        $name = $_POST['Name'];
+		$surname = $_POST['Surname'];
+        $query = $mysqli->prepare("INSERT INTO authors (name, surname, birth_date, death_date, life) VALUES (?,?,?,?,?)");
         if(!empty($_POST['Birth']))
         {
-            $query = $query."'".$_POST['Birth']."',";
+            $birth = $_POST['Birth'];
         }
         else
         {
-            $query = $query."null,";
+            $birth = null;
         }
         if($_POST['ifDeath'] == 'true')
         {
             if(!empty($_POST['Death']))
             {
-                $query = $query."'".$_POST['Death']."',";
+                $death = $_POST['Death'];
             }
             else
             {
-                $query = $query."null,";
+                $death = null;
             }
         }
         else
         {
-            $query = $query."null,";
+            $death = null;
         }
         if(!empty($_POST['Life']))
         {
-            $query = $query."'".str_replace("'","''",$_POST['Life'])."')";
+            $life = $_POST['Life'];
         }
         else
         {
-            $query = $query."null)";
+            $life = null;
         }
-        pg_query($connect,$query);
-        pg_close();
+        $query->bind_param("sssss",$name,$surname,$birth,$death,$life);
+        $query->execute();
+        $mysqli->close();
         echo '<script type="text/javascript">';
         echo 'window.close();';
         echo '</script>';

@@ -1,42 +1,60 @@
 <?php
-    $connect = pg_connect();
+    $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 	session_start();
-	if($connect)
+	if(!$mysqli->connect_error)
     {
-        pg_query($connect,"UPDATE authors SET name='".str_replace("'","''",$_POST['Name'])."' WHERE author_id=".$_POST['AuthorID']."");
-        pg_query($connect,"UPDATE authors SET surname='".str_replace("'","''",$_POST['Surname'])."' WHERE author_id=".$_POST['AuthorID']."");
+        $query = $mysqli->prepare("UPDATE authors SET name=? WHERE author_id=?");
+        $query->bind_param("si",$_POST['Name'],$_POST['AuthorID']);
+        $query->execute();
+        $query = $mysqli->prepare("UPDATE authors SET surname=? WHERE author_id=?");
+        $query->bind_param("si",$_POST['Surname'],$_POST['AuthorID']);
+        $query->execute();
         if(!empty($_POST['Birth']))
         {
-            pg_query($connect,"UPDATE authors SET birth_date='".$_POST['Birth']."' WHERE author_id=".$_POST['AuthorID']."");
+            $query = $mysqli->prepare("UPDATE authors SET birth_date=? WHERE author_id=?");
+            $query->bind_param("si",$_POST['Birth'],$_POST['AuthorID']);
+            $query->execute();
         }
         else
         {
-            pg_query($connect,"UPDATE authors SET birth_date=null WHERE author_id=".$_POST['AuthorID']."");
+            $query = $mysqli->prepare("UPDATE authors SET birth_date=null WHERE author_id=?");
+            $query->bind_param("i",$_POST['AuthorID']);
+            $query->execute();
         }
         if($_POST['ifDeath'] == 'true')
         {
             if(!empty($_POST['Death']))
             {
-                pg_query($connect,"UPDATE authors SET death_date='".$_POST['Death']."' WHERE author_id=".$_POST['AuthorID']."");
+                $query = $mysqli->prepare("UPDATE authors SET death_date=? WHERE author_id=?");
+                $query->bind_param("si",$_POST['Death'],$_POST['AuthorID']);
+                $query->execute();
             }
             else
             {
-                pg_query($connect,"UPDATE authors SET death_date=null WHERE author_id=".$_POST['AuthorID']."");
+                $query = $mysqli->prepare("UPDATE authors SET death_date=null WHERE author_id=?");
+                $query->bind_param("i",$_POST['AuthorID']);
+                $query->execute();
             }
         }
         else
         {
-            pg_query($connect,"UPDATE authors SET death_date=null WHERE author_id=".$_POST['AuthorID']."");
+            $query = $mysqli->prepare("UPDATE authors SET death_date=null WHERE author_id=?");
+            $query->bind_param("i",$_POST['AuthorID']);
+            $query->execute();
         }
         if(!empty($_POST['Life']))
         {
-            pg_query($connect,"UPDATE authors SET life='".str_replace("'","''",$_POST['Life'])."' WHERE author_id=".$_POST['AuthorID']."");
+            $query = $mysqli->prepare("UPDATE authors SET life=? WHERE author_id=?");
+            $query->bind_param("si",$_POST['Life'],$_POST['AuthorID']);
+            $query->execute();
         }
         else
         {
-            pg_query($connect,"UPDATE authors SET life=null WHERE author_id=".$_POST['AuthorID']."");
+            $query = $mysqli->prepare("UPDATE authors SET life=null WHERE author_id=?");
+            $query->bind_param("i",$_POST['AuthorID']);
+            $query->execute();
         }
-        pg_close();
+        $mysqli->close();
         header('Location: ../strony/authorinfo.php?id='.$_POST['AuthorID'].'');
 		exit();
     }
