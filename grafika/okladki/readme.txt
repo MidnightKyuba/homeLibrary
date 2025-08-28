@@ -1,0 +1,1 @@
+Tutaj zostają zapisane okładki książek dodanych w aplikacji
