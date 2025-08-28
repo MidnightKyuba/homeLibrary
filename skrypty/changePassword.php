@@ -8,6 +8,7 @@
             $result = $mysqli->prepare("SELECT password FROM users WHERE user_id = ?");
             $result->bind_param("i",$_SESSION['userID']);
             $result->execute();
+            $result = $result->get_result();
 			$checkPassword = $result->fetch_row();
             if(password_verify($_POST['OldPassword'],$checkPassword[0]))
             {

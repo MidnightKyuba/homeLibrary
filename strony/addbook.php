@@ -90,7 +90,7 @@
 							$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
     						if(!$mysqli->connect_error)
 							{
-								$results = $$mysqli->query("Select * From genres");
+								$results = $mysqli->query("Select * From genres");
 								while ($row = $results->fetch_row())
 								{
 									echo '<option value="'.$row[0].'">'.$row[1].'</option>';
@@ -112,7 +112,7 @@
 						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 						if(!$mysqli->connect_error)
 						{
-							$results = $mysqli->query($connect,"Select author_id, name, surname From authors");
+							$results = $mysqli->query("Select author_id, name, surname From authors");
 							while($row = $results->fetch_row())
 							{
 								echo '<input class="check" type="checkbox" name="Authors[]" value="'.$row[0].'" required>';

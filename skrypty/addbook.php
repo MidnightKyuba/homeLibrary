@@ -3,7 +3,7 @@
 	session_start();
 	if(!$mysqli->connect_error)
     {
-        $query = $mysqli->prepare("INSERT INTO allbooks (title, language_id, genre_id, serie_id, pages, publisher, publish_date, description, cover) VALUES (?,?,?,?,?,?,?,?,?) RETURNING all_book_id");
+        $query = $mysqli->prepare("INSERT INTO allbooks (title, language_id, genre_id, serie_id, pages, publisher, publish_date, description, cover) VALUES (?,?,?,?,?,?,?,?,?)");
         if(!empty($_POST['Pages']))
         {
             $pages = $_POST['Pages'];
@@ -67,11 +67,11 @@
         }
         $query->bind_param("siiiissss",$_POST['Title'],$_POST['Language'],$_POST['Genre'],$_POST['Serie'],$pages,$publisher,$publishDate,$description,$coverFileName);
         $query->execute();
-        $bookid = $query->fetch_row();
+        $bookid = $mysqli->insert_id;
         foreach($_POST['Authors'] as $author)
         {
             $query = $mysqli->prepare("INSERT INTO authorship (all_book_id, author_id) VALUES (?,?)");
-            $query->bind_param("ii",$bookid[0],$author);
+            $query->bind_param("ii",$bookid,$author);
             $query->execute();
         }
         $mysqli->close();

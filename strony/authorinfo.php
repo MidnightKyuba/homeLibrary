@@ -57,6 +57,7 @@
 					$results = $mysqli->prepare("Select * from authors where author_id=?");
 					$results->bind_param("i",$_GET['id']);
 					$results->execute();
+					$results = $results->get_result();
 					$row = $results->fetch_row();
 					echo '<p class="text">Imiona: '.$row[1].'<br>Nazwisko: '.$row[2].'<br>Data urodzenia: '.$row[3].'<br>Data śmierci: '.$row[4].'<br>Życiorys:<br>'.$row[5].'</p><hr>';
 					if($_SESSION['rank']<3)
@@ -66,6 +67,7 @@
 					$results = $mysqli->prepare("Select cover, title, a.all_book_id, s.name as serie from allbooks a inner join authorship ash on a.all_book_id = ash.all_book_id inner join series s on s.serie_id = a.serie_id where author_id=?");
 					$results->bind_param("i",$_GET['id']);
 					$results->execute();
+					$results = $results->get_result();
 					while($row = $results->fetch_row())
 					{
 						echo '<div class="card col-12 col-sm-12 col-md-6 col-lg-4 col-xl-4">';
@@ -83,6 +85,7 @@
 								$results2 = $mysqli->prepare("Select name, surname from authors natural join authorship where all_book_id=?");
 								$results2->bind_param("i",$row[2]);
 								$results2->execute();
+								$results2 = $results2->get_result();
 								while($row2 = $results2->fetch_row())
 								{
 									echo $row2[0]." ".$row2[1]."<br>";

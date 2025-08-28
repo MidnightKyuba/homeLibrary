@@ -57,12 +57,14 @@
 					$results = $mysqli->prepare("Select name, description from  series where serie_id=?");
 					$results->bind_param("i", $_GET['id']);
 					$results->execute();
-					$row1 = $resutls->fetch_row();
+					$results = $results->get_result();
+					$row1 = $results->fetch_row();
 					echo '<p class="text">Nazwa serii: '.$row1[0].'<br>Opis serii: '.$row1[1].'<br>Ile książek: ';
 					$results = $mysqli->prepare("Select count(all_book_id) from allbooks where serie_id=?");
 					$results->bind_param("i", $_GET['id']);
 					$results->execute();
-					$row2 = $resutls->fetch_row();
+					$results = $results->get_result();
+					$row2 = $results->fetch_row();
 					echo $row2[0];
 					echo '</p>';
 					echo '<a class="btn btn-primary text" href="editserie.php?id='.$_GET['id'].'">Edytuj informacje</a>';
@@ -70,6 +72,7 @@
 					$results = $mysqli->prepare("Select all_book_id, cover, title, s.name as serie from allbooks a inner join series s on a.serie_id = s.serie_id where a.serie_id=?");
 					$results->bind_param("i", $_GET['id']);
 					$results->execute();
+					$results = $results->get_result();
 					while($row3 = $results->fetch_row())
 					{
 						echo '<div class="card col-12 col-sm-12 col-md-6 col-lg-4 col-xl-4">';
@@ -87,6 +90,7 @@
 						$results2 = $mysqli->prepare("Select authors.name, authors.surname from authors natural join authorship where all_book_id=?");
 						$results2->bind_param("i", $row3[0]);
 						$results2->execute();
+						$results2 = $results2->get_result();
 						while($row4 = $results2->fetch_row())
 						{
 							echo $row4[0].' '.$row4[1].', ';

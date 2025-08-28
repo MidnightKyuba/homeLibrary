@@ -59,6 +59,7 @@
             $result = $mysqli->prepare("SELECT cover FROM allbooks WHERE all_book_id=?");
             $result->bind_param("i",$_POST['BookID']);
             $result->execute();
+            $result = $result->get_result();
             $cover = $result->fetch_row();
             if(!empty($cover[0]))
             {

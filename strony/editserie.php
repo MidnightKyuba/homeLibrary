@@ -68,6 +68,7 @@
 						$result = $mysqli->prepare("Select name From series Where serie_id=?");
 						$result->bind_param("i",$_GET['id']);
 						$result->execute();
+						$result = $result->get_result();
 						$row = $result->fetch_row();
 						echo '"'.$row[0].'"';
 						$mysqli->close();
@@ -79,14 +80,14 @@
                 ?>
                 >
 				<label class="form-label text">Opis:</label>
-				<textarea class="form-control" rows=10 name="Description">
-                <?php    
+				<textarea class="form-control" rows=10 name="Description"><?php    
                     $mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 					if(!$mysqli->connect_error)
 					{
 						$result = $mysqli->prepare("Select description From series Where serie_id=?");
 						$result->bind_param("i",$_GET['id']);
 						$result->execute();
+						$result = $result->get_result();
 						$row = $result->fetch_row();
 						echo $row[0];
 						$mysqli->close();
@@ -95,13 +96,12 @@
 					{
 						echo "<p class='text'>Nie można połączyć z bazą</p>";
 					}
-                ?>
-                </textarea>
+				?></textarea>
 				<input type="number" value=
 					<?php
 						echo '"'.$_GET['id'].'"'; 
 					?> name="SerieID" hidden>
-				<button class="btn btn-primary text" type="submit">Dodaj</button>
+				<button class="btn btn-primary text" type="submit">Edytuj</button>
 			</form>
 		</div>
 	</div>

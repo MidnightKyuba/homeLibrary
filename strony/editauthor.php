@@ -67,6 +67,7 @@
 							$results = $mysqli->prepare("Select name from authors where author_id=?");
 							$results->bind_param("i",$_GET['id']);
 							$results->execute();
+							$results = $results->get_result();
 							$row = $results->fetch_row();
 							echo '"'.$row[0].'"';
 							$mysqli->close();
@@ -87,6 +88,7 @@
 							$results = $mysqli->prepare("Select surname from authors where author_id=?");
 							$results->bind_param("i",$_GET['id']);
 							$results->execute();
+							$results = $results->get_result();
 							$row = $results->fetch_row();
 							echo '"'.$row[0].'"';
 							$mysqli->close();
@@ -107,6 +109,7 @@
 							$results = $mysqli->prepare("Select birth_date from authors where author_id=?");
 							$results->bind_param("i",$_GET['id']);
 							$results->execute();
+							$results = $results->get_result();
 							$row = $results->fetch_row();
 							echo '"'.$row[0].'"';
 							$mysqli->close();
@@ -127,6 +130,7 @@
 							$results = $mysqli->prepare("Select death_date from authors where author_id=?");
 							$results->bind_param("i",$_GET['id']);
 							$results->execute();
+							$results = $results->get_result();
 							$row = $results->fetch_row();
 							if($row[0] != null)
 							{
@@ -149,6 +153,7 @@
 							$results = $mysqli->prepare("Select death_date from authors where author_id=?");
 							$results->bind_param("i",$_GET['id']);
 							$results->execute();
+							$results = $results->get_result();
 							$row = $results->fetch_row();
 							if($row[0] == null)
 							{
@@ -173,6 +178,7 @@
 							$results = $mysqli->prepare("Select death_date from authors where author_id=?");
 							$results->bind_param("i",$_GET['id']);
 							$results->execute();
+							$results = $results->get_result();
 							$row = $results->fetch_row();
 							if($row[0] == null)
 							{
@@ -192,27 +198,26 @@
 				>
 				<br>
 				<label class="form-label text">Życiorys:</label>
-				<textarea class="form-control" rows="10" name="Life">
-					<?php
-						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
-						if(!$mysqli->connect_error)
+				<textarea class="form-control" rows="10" name="Life"><?php
+					$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
+					if(!$mysqli->connect_error)
+					{
+						$results = $mysqli->prepare("Select life from authors where author_id=?");
+						$results->bind_param("i",$_GET['id']);
+						$results->execute();
+						$results = $results->get_result();
+						$row = $results->fetch_row();
+						if(!empty($row[0]))
 						{
-							$results = $mysqli->prepare("Select life from authors where author_id=?");
-							$results->bind_param("i",$_GET['id']);
-							$results->execute();
-							$row = $results->fetch_row();
-							if(!empty($row[0]))
-							{
-								echo '"'.$row[0].'"';
-							}
-							$mysqli->close();
+							echo $row[0];
 						}
-						else
-						{
-							echo "<p class='text'>Nie można połączyć z bazą</p>";
-						}
-					?>
-				</textarea>
+						$mysqli->close();
+					}
+					else
+					{
+						echo "<p class='text'>Nie można połączyć z bazą</p>";
+					}
+				?></textarea>
 				<input type="number" value=
 					<?php
 						echo '"'.$_GET['id'].'"'; 

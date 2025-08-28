@@ -91,7 +91,7 @@
 						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
     					if(!$mysqli->connect_error)
 						{
-							$results = $mysqli->query($connect,"select * from genres");
+							$results = $mysqli->query("select * from genres");
 							while ($row = $results->fetch_row()) {
 								echo '<option value="'.$row[0].'">'.$row[1].'</option>';
 							}
@@ -177,7 +177,7 @@
 	function search()
 	{
 		$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
-		if($mysqli->connect_error)
+		if(!$mysqli->connect_error)
 		{
 			$titleResult = [];
 			$serieResult = [];
@@ -187,11 +187,17 @@
 			if(!empty($_GET['Title']))
 			{
 				$result = $mysqli->prepare("Select all_book_id from allbooks where title Like ?");
-				$result->bind_param("s", "%".$_GET['Title']."%");
+				$title = "%".$_GET['Title']."%";
+				$result->bind_param("s", $title);
 				$result->execute();
+				$result = $result->get_result();
 				while($row = $result->fetch_row())
 				{
 					$titleResult[] = $row;
+				}
+				if(empty($titleResult))
+				{
+					return;
 				}
 			}
 			if(!empty($_GET['Serie']))
@@ -199,9 +205,14 @@
 				$result = $mysqli->prepare("Select all_book_id from allbooks where serie_id=?");
 				$result->bind_param("i", $_GET['Serie']);
 				$result->execute();
+				$result = $result->get_result();
 				while($row = $result->fetch_row())
 				{
 					$serieResult[] = $row;
+				}
+				if(empty($serieResult))
+				{
+					return;
 				}
 			}
 			if(!empty($_GET['Genre']))
@@ -209,9 +220,14 @@
 				$result = $mysqli->prepare("Select all_book_id from allbooks where genre_id=?");
 				$result->bind_param("i", $_GET['Genre']);
 				$result->execute();
+				$result = $result->get_result();
 				while($row = $result->fetch_row())
 				{
 					$genreResult[] = $row;
+				}
+				if(empty($genreResult))
+				{
+					return;
 				}
 			}
 			if(!empty($_GET['Language']))
@@ -219,9 +235,14 @@
 				$result = $mysqli->prepare("Select all_book_id from allbooks where language_id=?");
 				$result->bind_param("i", $_GET['Language']);
 				$result->execute();
+				$result = $result->get_result();
 				while($row = $result->fetch_row())
 				{
 					$languageResult[] = $row;
+				}
+				if(empty($languageResult))
+				{
+					return;
 				}
 			}
 			if(!empty($_GET['Authors']))
@@ -231,6 +252,7 @@
 					$result = $mysqli->prepare("Select all_book_id from authorship where author_id=?");
 					$result->bind_param("i", $author);
 					$result->execute();
+					$result = $result->get_result();
 					$temporaryresult = [];
 					while($row = $result->fetch_row())
 					{
@@ -244,6 +266,10 @@
 					{
 						$authorResult = array_intersect($authorResult, $temporaryresult);
 					}
+				}
+				if(empty($authorResult))
+				{
+					return;
 				}
 			}
 			$bookIdIntersect = [];
@@ -267,8 +293,10 @@
 			if(!empty($bookIdIntersect))
 			{
 				$results = $mysqli->prepare("Select all_book_id, cover, title, s.name as serie from allbooks a inner join series s on a.serie_id = s.serie_id where all_book_id in (?)");
-				$results->bind_param("s", "(".implode(",",$bookIdIntersect).")");
+				$ids = implode(",",$bookIdIntersect[0]);
+				$results->bind_param("s", $ids);
 				$results->execute();
+				$results = $results->get_result();
 			}
 			else
 			{
@@ -293,6 +321,7 @@
 								$results2 = $mysqli->prepare("Select name, surname from authors natural join authorship where all_book_id=?");
 								$results2->bind_param("i",$row[0]);
 								$results2->execute();
+								$results2 = $results2->get_result();
 								while($row2 = $results2->fetch_row())
 								{
 										echo $row2[0].' '.$row2[1].'<br>';

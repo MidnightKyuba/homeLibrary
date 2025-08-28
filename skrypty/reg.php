@@ -6,6 +6,7 @@
         $result = $mysqli->prepare("SELECT user_id FROM users WHERE login = ?");
         $result->bind_param("s",$_POST['Login']);
         $result->execute();
+        $result = $result->get_result();
 		$userID = $result->fetch_row();
         if(empty($userID[0]))
         {
@@ -18,10 +19,12 @@
                 $result = $mysqli->prepare("SELECT user_id, login FROM users WHERE Login = ?");
                 $result->bind_param("s",$_POST['Login']);
                 $result->execute();
+                $result = $result->get_result();
 				$user = $result->fetch_row();
 				$result = $mysqli->prepare("SELECT rank_id FROM users WHERE user_id = ?");
                 $result->bind_param("i",$user[0]);
                 $result->execute();
+                $result = $result->get_result();
 				$rank = $result->fetch_row();
 				$mysqli->close();
 				$_SESSION['userID'] = $user[0];

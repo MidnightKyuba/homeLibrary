@@ -41,9 +41,12 @@
 	<div class="row main">
 		<div class="offset-xl-3 col-xl-6 offset-xl-3 offset-lg-3 col-lg-6 offset-lg-3 offset-md-3 col-md-6 offset-md-3 col-sm-12 col-12 mainlight">
 			<?php
-				if($_GET['m'] == "send")
+				if(!empty($_GET['m']))
 				{
-					echo '<h4 class="text">Wiadomość wysłana</h4>';
+					if($_GET['m'] == "send")
+					{
+						echo '<h4 class="text">Wiadomość wysłana</h4>';
+					}
 				}
 			?>
 			<h4 class="text">

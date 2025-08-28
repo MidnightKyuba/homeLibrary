@@ -75,6 +75,7 @@
 							$results = $mysqli->prepare("Select title From allbooks where all_book_id=?");
 							$results->bind_param("i",$_GET['id']);
 							$results->execute();
+							$results = $results->get_result();
 							$row = $results->fetch_row();
 							echo '"'.$row[0].'"';
 							$mysqli->close();
@@ -92,9 +93,10 @@
 							if(!$mysqli->connect_error)
 							{
 								$results = $mysqli->query("Select * From languages");
-								$clanguage = pg_query("Select language_id From allbooks Where all_book_id=?");
+								$clanguage = $mysqli->prepare("Select language_id From allbooks Where all_book_id=?");
 								$clanguage->bind_param("i",$_GET['id']);
 								$clanguage->execute();
+								$clanguage = $clanguage->get_result();
 								$row2 = $clanguage->fetch_row();
 								while($row1 = $results->fetch_row())
 								{
@@ -122,10 +124,11 @@
 							$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 							if(!$mysqli->connect_error)
 							{
-								$results = $mysqli->query($connect,"Select * From genres");
+								$results = $mysqli->query("Select * From genres");
 								$cgenre = $mysqli->prepare("Select genre_id From allbooks Where all_book_id=?");
 								$cgenre->bind_param("i",$_GET['id']);
 								$cgenre->execute();
+								$cgenre = $cgenre->get_result();
 								$row2 = $cgenre->fetch_row();
 								while($row1 = $results->fetch_row())
 								{
@@ -154,7 +157,7 @@
 						$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 						if(!$mysqli->connect_error)
 						{
-							$results = $mysqli->query($connect,"Select author_id, name, surname From authors");
+							$results = $mysqli->query("Select author_id, name, surname From authors");
 							while($row1 = $results->fetch_row())
 							{
 								echo '<br>';
@@ -162,6 +165,7 @@
 								$results2 = $mysqli->prepare("Select author_id From authorship where all_book_id=?");
 								$results2->bind_param("i",$_GET['id']);
 								$results2->execute();
+								$results2 = $results2->get_result();
 								while($row2 = $results2->fetch_row())
 								{
 									if($row1[0] == $row2[0])
@@ -188,12 +192,13 @@
 							$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 							if(!$mysqli->connect_error)
 							{
-								$results = $mysqli->query($connect,"Select * From series");
+								$results = $mysqli->query("Select * From series");
 								$cserie = $mysqli->prepare("Select serie_id From allBooks where all_book_id=?");
 								$cserie->bind_param("i",$_GET['id']);
 								$cserie->execute();
+								$cserie = $cserie->get_result();
 								$row2 = $cserie->fetch_row();
-								while($row1 = pg_fetch_row($results))
+								while($row1 = $results->fetch_row())
 								{
 									if($row1[0] != $row2[0])
 									{
@@ -225,6 +230,7 @@
 						$result = $mysqli->prepare("Select publisher From allbooks Where all_book_id=?");
 						$result->bind_param("i",$_GET['id']);
 						$result->execute();
+						$result = $result->get_result();
 						$row = $result->fetch_row();
 						echo '"'.$row[0].'"';
 						$mysqli->close();
@@ -244,6 +250,7 @@
 						$result = $mysqli->prepare("Select publish_date From allbooks Where all_book_id=?");
 						$result->bind_param("i",$_GET['id']);
 						$result->execute();
+						$result = $result->get_result();
 						$row = $result->fetch_row();
 						echo '"'.$row[0].'"';
 						$mysqli->close();
@@ -255,7 +262,7 @@
 				?>
 				>
 				<label class="text form-label">Ilość stron:</label>
-				<input class="form-control" type="number" value=
+				<input class="form-control" name="Pages" type="number" value=
 				<?php
 					$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 					if(!$mysqli->connect_error)
@@ -263,6 +270,7 @@
 						$result = $mysqli->prepare("Select pages From allbooks Where all_book_id=?");
 						$result->bind_param("i",$_GET['id']);
 						$result->execute();
+						$result = $result->get_result();
 						$row = $result->fetch_row();
 						echo '"'.$row[0].'"';
 						$mysqli->close();
@@ -274,14 +282,14 @@
 				?>
 				>
 				<label class="text form-label">Opis:</label>
-				<textarea class="form-control" rows="10" name="Description">
-				<?php
+				<textarea class="form-control" rows="10" name="Description"><?php
 					$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 					if(!$mysqli->connect_error)
 					{
 						$result = $mysqli->prepare("Select description From allbooks Where all_book_id=?");
 						$result->bind_param("i",$_GET['id']);
 						$result->execute();
+						$result = $result->get_result();
 						$row = $result->fetch_row();
 						echo $row[0];
 						$mysqli->close();
@@ -290,8 +298,7 @@
 					{
 						echo "<p class='text'>Nie można połączyć z bazą</p>";
 					}
-				?>
-				</textarea>
+				?></textarea>
 				<label class="text form-label">Nowa okładka:</label>
 				<input name="Cover" type="file" accept="image/*">
 				<br>

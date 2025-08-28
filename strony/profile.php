@@ -57,6 +57,7 @@
 				$results = $mysqli->prepare("SELECT email FROM users WHERE user_id=?");
 				$results->bind_param("i", $_SESSION['userID']);
 				$results->execute();
+				$results = $results->get_result();
 				$row1 = $results->fetch_row();
 				echo "<p class='text'>Email: ".$row1[0]."</p>";
 				$mysqli->close();
@@ -72,9 +73,12 @@
 			<button class="btn btn-primary text" type="submit">Zmień</button>
 		</form>
 		<?php
-			if($_GET['m'] == "changePassword")
+			if(!empty($_GET['m']))
 			{
-				echo '<p class="text">Hasło zostało zmienione</p>';
+				if($_GET['m'] == "changePassword")
+				{
+					echo '<p class="text">Hasło zostało zmienione</p>';
+				}
 			} 
 		?>
 		<form action="../skrypty/changePassword.php" method="post" autocomplete="on">
@@ -89,10 +93,13 @@
 		</form>
 		<?php if($_SESSION['rank'] == 1) :?>
 		<?php
-		if($_GET['m'] == "changeRank")
-		{
-			echo '<p class="text">Ranga użytkownika zostało zmieniona</p>';
-		} 
+			if(!empty($_GET['m']))
+			{
+				if($_GET['m'] == "changeRank")
+				{
+					echo '<p class="text">Ranga użytkownika zostało zmieniona</p>';
+				}
+			} 
 		?>
 		<form action="../skrypty/changeRank.php" method="post" autocomplete="on">
 			<legend class="text">Zmień rangę użytkownika</legend>
@@ -121,7 +128,7 @@
 					$mysqli = new mysqli("localhost", "root", "", "homeLibrary");
 					if(!$mysqli->connect_error)
 					{
-						$results = $mysqli->query($connect,"SELECT rank_id, rank_name FROM ranks");
+						$results = $mysqli->query("SELECT rank_id, rank_name FROM ranks");
 						while ($row1 = $results->fetch_row())
 						{
 							echo '<option value="'.$row1[0].'">'.$row1[1].'</option>';

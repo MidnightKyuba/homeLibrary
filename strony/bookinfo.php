@@ -57,10 +57,12 @@
 					$result1 = $mysqli->prepare("Select all_book_id, cover, title, l.name as language, g.name as genre, s.serie_id, s.name as serie, publisher, publish_date, pages, a.description from allbooks a inner join languages l on l.language_id=a.language_id inner join genres g on g.genre_id=a.genre_id inner join series s on s.serie_id = a.serie_id where all_book_id=?");
 					$result1->bind_param("i",$_GET['id']);
 					$result1->execute();
+					$result1 = $result1->get_result();
 					$row1 = $result1->fetch_row();
 					$results2 = $mysqli->prepare("Select author_id, name, surname from authors natural join authorship where all_book_id=?");
 					$results2->bind_param("i",$_GET['id']);
 					$results2->execute();
+					$results2 = $results2->get_result();
 					if(!empty($row1[1]))
 					{
 						echo '<img class="image-fluid col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" src="../grafika/okladki/'.$row1[1].'?'.filemtime('../grafika/okladki/'.$row1[1]).'">';
